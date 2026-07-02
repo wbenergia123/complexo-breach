@@ -61,6 +61,10 @@ Spawn dinâmico cria frentes de batalha móveis.
 
 ---
 
+## Referências técnicas
+
+Ver [pesquisa-repositorios.md](pesquisa-repositorios.md) para análise completa de libs e repos open source.
+
 ## Stack técnica
 
 | Ferramenta | Uso |
