@@ -33,31 +33,6 @@ cc.Parent = Lighting
 
 print("Future Lighting ativado!")
 
--- Organiza e escala todos os models/meshes do workspace
-local targetSize = 60
-local cols = 5
-local spacing = 80
-local index = 0
-
-for _, parent in ipairs(workspace:GetChildren()) do
-	if parent:IsA("Model") and parent.Name ~= "Camera" and parent.Name ~= "Terrain" and parent.Name ~= "Baseplate" then
-		for _, obj in ipairs(parent:GetDescendants()) do
-			if obj:IsA("MeshPart") then
-				index += 1
-				local maxDim = math.max(obj.Size.X, obj.Size.Y, obj.Size.Z)
-				if maxDim > 0 then
-					obj.Size = obj.Size * (targetSize / maxDim)
-				end
-				local col = (index - 1) % cols
-				local row = math.floor((index - 1) / cols)
-				local pos = CFrame.new(col * spacing, 10, row * spacing)
-				if parent.Name == "pack_meshy" then
-					obj:PivotTo(pos * CFrame.Angles(math.rad(90), 0, 0))
-				else
-					obj:PivotTo(pos)
-				end
-			end
-		end
-	end
-end
-print("Pronto! " .. index .. " meshes organizados.")
+-- NOTA: o loop que reescalava e reorganizava os meshes num grid foi removido.
+-- Ele era uma ferramenta de organização inicial (uso único) e estava embaralhando
+-- a favela toda a cada Play. O posicionamento agora é definido direto na cena.

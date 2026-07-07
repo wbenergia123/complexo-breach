@@ -6,3 +6,22 @@
 /*.rbxl.lock
 
 sourcemap.json
+
+# assets pesados / intermediarios (nao versionar)
+assets/*.blend
+assets/*.blend1
+assets/refem_paraMixamo.*
+assets/walk_anim.*
+assets/refem_rigged.*
+assets/refem_sentada.*
+assets/refem_final_sentada.*
+assets/refem_v2.*
+assets/refem_r15*
+assets/refem_walk.*
+assets/anim_walk.fbx
+assets/anim_walk_full.fbx
+assets/anim_walk_30fps.fbx
+assets/anim_crouch.fbx
+assets/anim_run.fbx
+assets/anim_*_v2.fbx
+.claude/
