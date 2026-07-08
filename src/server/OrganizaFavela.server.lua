@@ -1,3 +1,9 @@
+-- Só roda no place da favela (não no menu / outros mapas).
+local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Config"))
+if game.PlaceId ~= Config.FavelaPlaceId then
+	return
+end
+
 -- Future Lighting
 local Lighting = game:GetService("Lighting")
 Lighting.Technology = Enum.Technology.Future

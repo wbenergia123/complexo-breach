@@ -2,6 +2,12 @@
 -- Materiais mapeados pelo penúltimo token do nome do mesh (ex: "gate1_gate3_0" → "gate3")
 -- IDs obtidos via upload pela API apis.roblox.com/assets/user-auth (conta wbgam9)
 
+-- Só roda no place da favela (não no menu / outros mapas).
+local Config = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Config"))
+if game.PlaceId ~= Config.FavelaPlaceId then
+	return
+end
+
 local workspace = game:GetService("Workspace")
 
 local favela = workspace:WaitForChild("favela_roblox", 10)
