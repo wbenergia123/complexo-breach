@@ -1,5 +1,6 @@
 -- src/client/WeaponClient/Effects.luau
--- Muzzle flash + tracer + som por tiro. Puramente visual/áudio (cliente).
+-- Muzzle flash (partícula + luz) + fumaça + tracer + som por tiro. Só visual/áudio (cliente).
+-- Técnica: ParticleEmitters no cano (como Evostrike), texturas nativas do Roblox.
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
@@ -8,7 +9,7 @@ local Debris = game:GetService("Debris")
 local Effects = {}
 Effects.__index = Effects
 
-local FLASH_TIME = 0.05
+local FLASH_TIME = 0.04
 local TRACER_TIME = 0.06
 
 function Effects.new(viewmodelPart, cfg)
@@ -16,10 +17,49 @@ function Effects.new(viewmodelPart, cfg)
 	self.part = viewmodelPart
 	self.cfg = cfg
 
-	-- luz do disparo (presa no cano)
+	-- ponto do cano
+	local muzzle = Instance.new("Attachment")
+	muzzle.Name = "Muzzle"
+	muzzle.Position = Vector3.new(0, 0, -viewmodelPart.Size.Z / 2)
+	muzzle.Parent = viewmodelPart
+	self.muzzle = muzzle
+
+	-- flash: brilho aditivo, curto, rotação aleatória
+	local flash = Instance.new("ParticleEmitter")
+	flash.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	flash.Color = ColorSequence.new(Color3.fromRGB(255, 220, 130))
+	flash.LightEmission = 1
+	flash.LightInfluence = 0
+	flash.Size = NumberSequence.new(1.3)
+	flash.Lifetime = NumberRange.new(0.02, 0.05)
+	flash.Speed = NumberRange.new(0)
+	flash.Rotation = NumberRange.new(0, 360)
+	flash.Rate = 0
+	flash.Enabled = false
+	flash.Parent = muzzle
+	self.flash = flash
+
+	-- fumaça: cinza, some rápido, deriva pra frente
+	local smoke = Instance.new("ParticleEmitter")
+	smoke.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	smoke.Color = ColorSequence.new(Color3.fromRGB(120, 120, 120))
+	smoke.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.5),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	smoke.Size = NumberSequence.new(0.25, 0.8)
+	smoke.Lifetime = NumberRange.new(0.2, 0.35)
+	smoke.Speed = NumberRange.new(2, 4)
+	smoke.SpreadAngle = Vector2.new(12, 12)
+	smoke.Rate = 0
+	smoke.Enabled = false
+	smoke.Parent = muzzle
+	self.smoke = smoke
+
+	-- luz do disparo (dá o "pop")
 	local light = Instance.new("PointLight")
 	light.Color = Color3.fromRGB(255, 220, 140)
-	light.Range = 10
+	light.Range = 12
 	light.Brightness = 0
 	light.Parent = viewmodelPart
 	self.light = light
@@ -36,15 +76,13 @@ function Effects.new(viewmodelPart, cfg)
 	return self
 end
 
-local function muzzlePos(part)
-	return (part.CFrame * CFrame.new(0, 0, -part.Size.Z / 2)).Position
-end
-
 function Effects:fire(direction)
-	local origin = muzzlePos(self.part)
+	local origin = self.muzzle.WorldPosition
 
-	-- muzzle flash
-	self.light.Brightness = 3
+	-- muzzle flash: partículas + luz
+	self.flash:Emit(2)
+	self.smoke:Emit(1)
+	self.light.Brightness = 4
 	task.delay(FLASH_TIME, function()
 		if self.light then
 			self.light.Brightness = 0
