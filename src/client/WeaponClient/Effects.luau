@@ -24,14 +24,16 @@ function Effects.new(viewmodelPart, cfg)
 	muzzle.Parent = viewmodelPart
 	self.muzzle = muzzle
 
-	-- flash: brilho aditivo, curto, rotação aleatória
+	-- flash: flipbook animado (renderizado no Blender), brilho aditivo, rotação aleatória
 	local flash = Instance.new("ParticleEmitter")
-	flash.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-	flash.Color = ColorSequence.new(Color3.fromRGB(255, 220, 130))
+	flash.Texture = "rbxassetid://140113915403252" -- muzzle flash 4x4 (16 quadros)
+	flash.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid4x4
+	flash.FlipbookMode = Enum.ParticleFlipbookMode.OneShot
+	flash.Color = ColorSequence.new(Color3.fromRGB(255, 210, 120)) -- tinge quente
 	flash.LightEmission = 1
 	flash.LightInfluence = 0
-	flash.Size = NumberSequence.new(1.3)
-	flash.Lifetime = NumberRange.new(0.02, 0.05)
+	flash.Size = NumberSequence.new(2.2)
+	flash.Lifetime = NumberRange.new(0.06, 0.06)
 	flash.Speed = NumberRange.new(0)
 	flash.Rotation = NumberRange.new(0, 360)
 	flash.Rate = 0
@@ -79,8 +81,8 @@ end
 function Effects:fire(direction)
 	local origin = self.muzzle.WorldPosition
 
-	-- muzzle flash: partículas + luz
-	self.flash:Emit(2)
+	-- muzzle flash: flipbook + fumaça + luz
+	self.flash:Emit(1)
 	self.smoke:Emit(1)
 	self.light.Brightness = 4
 	task.delay(FLASH_TIME, function()
