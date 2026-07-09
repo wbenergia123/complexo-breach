@@ -17,11 +17,14 @@ function Effects.new(viewmodelPart, cfg)
 	self.part = viewmodelPart
 	self.cfg = cfg
 
-	-- ponto do cano
-	local muzzle = Instance.new("Attachment")
-	muzzle.Name = "Muzzle"
-	muzzle.Position = Vector3.new(0, 0, -viewmodelPart.Size.Z / 2)
-	muzzle.Parent = viewmodelPart
+	-- ponto do cano: o Viewmodel cria "MuzzlePoint" na ponta; fallback se não achar
+	local muzzle = viewmodelPart:FindFirstChild("MuzzlePoint")
+	if not muzzle then
+		muzzle = Instance.new("Attachment")
+		muzzle.Name = "MuzzlePoint"
+		muzzle.Position = Vector3.new(0, 0, -viewmodelPart.Size.Z / 2)
+		muzzle.Parent = viewmodelPart
+	end
 	self.muzzle = muzzle
 
 	-- flash: flipbook animado (renderizado no Blender), brilho aditivo, rotação aleatória
