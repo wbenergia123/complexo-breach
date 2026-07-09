@@ -30,10 +30,10 @@ function Viewmodel.new()
 	gun.Parent = Workspace
 	self.part = gun
 
-	-- ponto do cano (ponta -X do mesh) pro muzzle flash sair daí
+	-- ponto do cano (ponta +X do mesh, que aponta pra frente após o GUN_ROT)
 	local muzzle = Instance.new("Attachment")
 	muzzle.Name = "MuzzlePoint"
-	muzzle.Position = Vector3.new(-gun.Size.X / 2, 0.06 * SCALE, 0)
+	muzzle.Position = Vector3.new(gun.Size.X / 2, 0.06 * SCALE, 0)
 	muzzle.Parent = gun
 
 	self.recoilOffset = CFrame.new()
