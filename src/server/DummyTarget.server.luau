@@ -11,7 +11,8 @@ if game.PlaceId ~= Config.FavelaPlaceId then
 	return
 end
 
-local SPAWN_CFRAME = CFrame.new(0, 5, -20) -- ajustar pro ponto desejado no mapa
+-- 12 studs à frente do spawn, pés no chão da rua, de frente pro jogador
+local SPAWN_CFRAME = CFrame.lookAt(Vector3.new(-28, 4.2, 10), Vector3.new(-28, 4.2, 22))
 local RESPAWN_DELAY = 3
 
 local template = ServerStorage:WaitForChild("TrainingDummy")
