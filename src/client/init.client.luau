@@ -9,4 +9,7 @@ if game.PlaceId == Config.StartPlaceId then
 	local LobbyCamera = require(script:WaitForChild("LobbyCamera"))
 	MainMenu.mount()
 	LobbyCamera.start()
+elseif game.PlaceId == Config.FavelaPlaceId then
+	local WeaponClient = require(script:WaitForChild("WeaponClient"))
+	WeaponClient.start()
 end
