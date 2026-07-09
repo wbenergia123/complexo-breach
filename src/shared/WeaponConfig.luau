@@ -5,7 +5,7 @@
 local WeaponConfig = {}
 
 WeaponConfig.Rifle = {
-	name = "placeholder_rifle",
+	name = "X9-72",
 	automatic = true,
 	fireRate = 0.1, -- segundos entre tiros (0.1 = 600 rpm)
 	shots = 1, -- pellets por disparo (>1 = shotgun no futuro)
