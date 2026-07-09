@@ -26,6 +26,11 @@ WeaponConfig.Rifle = {
 	}, -- {lado, cima} por bala
 	recoilRecovery = 0.3,
 	recoilSpring = { mass = 5, force = 50, damping = 4 },
+	-- mira (ADS)
+	baseFov = 70,
+	adsFov = 55,
+	-- som (deixar "" enquanto não escolher um SoundId válido)
+	fireSoundId = "",
 }
 
 local LEG_PARTS = {

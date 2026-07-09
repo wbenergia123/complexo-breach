@@ -7,7 +7,8 @@ local Workspace = game:GetService("Workspace")
 local Viewmodel = {}
 Viewmodel.__index = Viewmodel
 
-local OFFSET = CFrame.new(0.8, -0.8, -1.6) -- direita, baixo, frente
+local HIP = CFrame.new(0.8, -0.8, -1.6) -- direita, baixo, frente
+local ADS = CFrame.new(0, -0.35, -1.0) -- centralizado ao mirar
 
 function Viewmodel.new()
 	local self = setmetatable({}, Viewmodel)
@@ -23,12 +24,21 @@ function Viewmodel.new()
 	part.Parent = Workspace
 	self.part = part
 	self.recoilOffset = CFrame.new()
+	self.aiming = false
+	self.aimAlpha = 0
 
-	self.conn = RunService.RenderStepped:Connect(function()
+	self.conn = RunService.RenderStepped:Connect(function(dt)
+		local target = self.aiming and 1 or 0
+		self.aimAlpha += (target - self.aimAlpha) * math.clamp(dt * 12, 0, 1)
+		local offset = HIP:Lerp(ADS, self.aimAlpha)
 		local cam = Workspace.CurrentCamera
-		part.CFrame = cam.CFrame * self.recoilOffset * OFFSET
+		part.CFrame = cam.CFrame * self.recoilOffset * offset
 	end)
 	return self
+end
+
+function Viewmodel:setAiming(aiming)
+	self.aiming = aiming
 end
 
 -- recoilCFrame vem do módulo Recoil (kick visual)
