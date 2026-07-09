@@ -46,6 +46,7 @@ docs/
 ## Docs
 
 - [GDD — Game Design Document](docs/GDD.md)
+- [Plano do Menu Principal](docs/menu-plan.md)
 - [Regras da equipe](docs/regras-equipe.md)
 - [Checklist de revisão](docs/revisao-lider.md)
 - [Setup MCP](docs/robloxstudio-mcp-setup.md)
