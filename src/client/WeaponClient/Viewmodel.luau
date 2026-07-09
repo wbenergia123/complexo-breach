@@ -9,11 +9,11 @@ local Viewmodel = {}
 Viewmodel.__index = Viewmodel
 
 -- posições da arma relativas à câmera
-local HIP = CFrame.new(0.7, -0.7, -1.4)
-local ADS = CFrame.new(0, -0.45, -1.0)
+local HIP = CFrame.new(0.55, -0.55, -1.7)
+local ADS = CFrame.new(0, -0.35, -1.2)
 -- gira o mesh pra o cano (-X do mesh) apontar pra frente (-Z da câmera)
 local GUN_ROT = CFrame.Angles(0, math.rad(-90), 0)
-local SCALE = 0.9
+local SCALE = 0.5
 
 function Viewmodel.new()
 	local self = setmetatable({}, Viewmodel)
