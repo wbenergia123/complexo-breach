@@ -26,7 +26,7 @@ function Effects.new(viewmodelPart, cfg)
 
 	-- flash: flipbook animado (renderizado no Blender), brilho aditivo, rotação aleatória
 	local flash = Instance.new("ParticleEmitter")
-	flash.Texture = "rbxassetid://140113915403252" -- muzzle flash 4x4 (16 quadros)
+	flash.Texture = "rbxassetid://89860754097528" -- muzzle flash 4x4 v2 (16 quadros, mais real + fogo forte)
 	flash.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid4x4
 	flash.FlipbookMode = Enum.ParticleFlipbookMode.OneShot
 	flash.Color = ColorSequence.new(Color3.fromRGB(255, 210, 120)) -- tinge quente
