@@ -10,7 +10,7 @@ local Remotes = require(game.ReplicatedStorage.Shared.WeaponRemotes)
 
 local Input = {}
 
-function Input.start(cfg, recoil)
+function Input.start(cfg, recoil, effects, aim)
 	local firing = false
 	local lastLocalShot = 0
 	local localMag = cfg.ammo.magazine -- predição; HUD reconcilia com servidor [R2]
@@ -27,6 +27,7 @@ function Input.start(cfg, recoil)
 		localMag -= 1
 		recoil:kick() -- feedback instantâneo
 		local dir = Workspace.CurrentCamera.CFrame.LookVector
+		effects:fire(dir) -- muzzle flash + tracer + som
 		Remotes.FireRequest:FireServer(dir) -- [R3] só direção
 	end
 
@@ -55,6 +56,15 @@ function Input.start(cfg, recoil)
 		end
 		return Enum.ContextActionResult.Pass
 	end, true, Enum.KeyCode.R)
+
+	CAS:BindAction("Aim", function(_, inputState)
+		if inputState == Enum.UserInputState.Begin then
+			aim:set(true)
+		elseif inputState == Enum.UserInputState.End then
+			aim:set(false)
+		end
+		return Enum.ContextActionResult.Pass
+	end, true, Enum.UserInputType.MouseButton2) -- [R8] 3º arg cria botão mobile de mirar
 
 	-- expõe pro HUD reconciliar munição autoritativa
 	Input.setLocalMag = function(v)

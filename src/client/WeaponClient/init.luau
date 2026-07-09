@@ -7,6 +7,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local WeaponConfig = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("WeaponConfig"))
 local Viewmodel = require(script:WaitForChild("Viewmodel"))
 local Recoil = require(script:WaitForChild("Recoil"))
+local Effects = require(script:WaitForChild("Effects"))
+local Aim = require(script:WaitForChild("Aim"))
 local Input = require(script:WaitForChild("Input"))
 local HUD = require(script:WaitForChild("HUD"))
 
@@ -18,7 +20,9 @@ function WeaponClient.start()
 
 	local viewmodel = Viewmodel.new()
 	local recoil = Recoil.new(WeaponConfig.Rifle, viewmodel)
-	Input.start(WeaponConfig.Rifle, recoil)
+	local effects = Effects.new(viewmodel.part, WeaponConfig.Rifle)
+	local aim = Aim.new(WeaponConfig.Rifle, viewmodel)
+	Input.start(WeaponConfig.Rifle, recoil, effects, aim)
 	HUD.start(WeaponConfig.Rifle, function(serverAmmo)
 		if Input.setLocalMag then
 			Input.setLocalMag(serverAmmo)
@@ -27,6 +31,8 @@ function WeaponClient.start()
 
 	WeaponClient.viewmodel = viewmodel
 	WeaponClient.recoil = recoil
+	WeaponClient.effects = effects
+	WeaponClient.aim = aim
 	WeaponClient.input = Input
 end
 
