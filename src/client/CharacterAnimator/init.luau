@@ -12,7 +12,12 @@ local PistolAnims = require(ReplicatedStorage.Shared.PistolAnims)
 local Remotes = require(ReplicatedStorage.Shared.CharacterRemotes)
 local StateResolver = require(script.StateResolver)
 
-local UPPER_KEYS = { aimUpper = true, shootUpper = true, reloadUpper = true }
+-- camadas Action escalonadas: tiro/recarga vencem a mira (senao se misturam na media)
+local UPPER_PRIORITY = {
+	aimUpper = Enum.AnimationPriority.Action,
+	shootUpper = Enum.AnimationPriority.Action3,
+	reloadUpper = Enum.AnimationPriority.Action2,
+}
 
 local CharacterAnimator = {}
 
@@ -35,8 +40,7 @@ local function loadTracks(animator: Animator)
 			return animator:LoadAnimation(anim)
 		end)
 		if ok and track then
-			track.Priority = UPPER_KEYS[key] and Enum.AnimationPriority.Action
-				or Enum.AnimationPriority.Movement
+			track.Priority = UPPER_PRIORITY[key] or Enum.AnimationPriority.Movement
 			tracks[key] = track
 		else
 			warn("[CharacterAnimator] falhou carregar anim:", key)

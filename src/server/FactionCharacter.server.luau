@@ -74,12 +74,16 @@ end
 
 local function spawnFaction(player: Player)
 	cleanupPlayer(player)
+	local old = player.Character -- avatar padrão ou cadáver do respawn
 	local rig = rigTemplate:Clone()
 	rig.Name = player.Name
 
 	-- [spec v2] ordem obrigatória: Character ANTES de parentear no Workspace
 	player.Character = rig
 	rig.Parent = workspace
+	if old and old ~= rig then
+		old:Destroy() -- senão cada morte/reset deixa um boneco eterno na cena
+	end
 	rig:PivotTo(pickSpawnCFrame())
 
 	local humanoid = rig:WaitForChild("Humanoid") :: Humanoid
