@@ -35,6 +35,11 @@ local PistolAnims = {
 	crouchRight = "125379093970600", -- agachado de lado direita (quadril baixado 0.85)
 
 	death = "76863593900265", -- morte (headshot), corpo cai colado no chao (quadril baixado frame-a-frame)
+
+	-- upper-body (so tronco/bracos, pernas Weight=0 -> locomocao continua por baixo):
+	aimUpper = "88082041310959", -- mira em movimento
+	shootUpper = "108278896766090", -- tiro em movimento
+	reloadUpper = "125618398370540", -- recarga em movimento
 }
 
 return PistolAnims
