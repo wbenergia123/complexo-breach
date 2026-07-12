@@ -16,7 +16,7 @@ local WeaponClient = {}
 
 function WeaponClient.start()
 	local player = Players.LocalPlayer
-	local DEBUG_THIRD_PERSON = true -- TEMP: destrava a camera pra ver o proprio corpo (reverter depois)
+	local DEBUG_THIRD_PERSON = false -- true = destrava a camera pra ver o proprio corpo (debug de anims)
 	if not DEBUG_THIRD_PERSON then
 		player.CameraMode = Enum.CameraMode.LockFirstPerson -- [R7]
 	end

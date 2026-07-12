@@ -109,8 +109,13 @@ local function onCharacter(char: Model)
 			end
 			if newT then
 				if target == "crouchIdle" then
-					newT.TimePosition = 0 -- frame neutro (pés juntos)
 					newT:AdjustSpeed(0) -- congela agachado
+					-- gotcha: Play() reseta TimePosition no mesmo frame; setar um passo depois
+					task.defer(function()
+						if current == "crouchIdle" then
+							newT.TimePosition = 0.29 -- frame medido: 2 pés plantados e afastados
+						end
+					end)
 				else
 					newT:AdjustSpeed(1)
 				end
