@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local Remotes = require(game.ReplicatedStorage.Shared.WeaponRemotes)
+local CharacterAnimator = require(script.Parent.Parent.CharacterAnimator)
 
 local Input = {}
 
@@ -28,6 +29,7 @@ function Input.start(cfg, recoil, effects, aim)
 		recoil:kick() -- feedback instantâneo
 		local dir = Workspace.CurrentCamera.CFrame.LookVector
 		effects:fire(dir) -- muzzle flash + tracer + som
+		CharacterAnimator.onShot() -- tranco do tiro em 3ª pessoa
 		Remotes.FireRequest:FireServer(dir) -- [R3] só direção
 	end
 
@@ -53,6 +55,7 @@ function Input.start(cfg, recoil, effects, aim)
 		if inputState == Enum.UserInputState.Begin then
 			Remotes.Reload:FireServer()
 			recoil:reset()
+			CharacterAnimator.onReload() -- recarga em 3ª pessoa
 		end
 		return Enum.ContextActionResult.Pass
 	end, true, Enum.KeyCode.R)
@@ -60,8 +63,10 @@ function Input.start(cfg, recoil, effects, aim)
 	CAS:BindAction("Aim", function(_, inputState)
 		if inputState == Enum.UserInputState.Begin then
 			aim:set(true)
+			CharacterAnimator.setAiming(true)
 		elseif inputState == Enum.UserInputState.End then
 			aim:set(false)
+			CharacterAnimator.setAiming(false)
 		end
 		return Enum.ContextActionResult.Pass
 	end, true, Enum.UserInputType.MouseButton2) -- [R8] 3º arg cria botão mobile de mirar

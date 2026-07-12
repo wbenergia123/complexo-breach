@@ -16,7 +16,10 @@ local WeaponClient = {}
 
 function WeaponClient.start()
 	local player = Players.LocalPlayer
-	player.CameraMode = Enum.CameraMode.LockFirstPerson -- [R7]
+	local DEBUG_THIRD_PERSON = false -- true = destrava a camera pra ver o proprio corpo (debug de anims)
+	if not DEBUG_THIRD_PERSON then
+		player.CameraMode = Enum.CameraMode.LockFirstPerson -- [R7]
+	end
 
 	local viewmodel = Viewmodel.new()
 	local recoil = Recoil.new(WeaponConfig.Rifle, viewmodel)
