@@ -31,7 +31,9 @@ modular. Gated por `game.PlaceId == Config.FavelaPlaceId`.
 Modelo `TraficanteRig` guardado em `ServerStorage` (montado uma vez a partir do
 `Workspace.Terrorista_char`):
 
-- `HumanoidRootPart` (caixa de colisão ~2×5×1.4, invisível, CanCollide **on**) — física
+- `HumanoidRootPart` (caixa de colisão ~2×5×1.4, invisível, CanCollide **on**,
+  **`CanQuery=false`** — senão a caixa engole todos os tiros antes das hitboxes nomeadas
+  e headshot nunca acontece; física não depende de CanQuery) — física
 - `Humanoid` com `AutomaticScalingEnabled=false`, `HipHeight` manual,
   `BreakJointsOnDeath=false` (senão o corpo desmonta na morte), `RequiresNeck=false`
 - Mesh skinned soldado (WeldConstraint) na HRP, `CanCollide=false`, **`CanQuery=false`**
@@ -42,9 +44,11 @@ Modelo `TraficanteRig` guardado em `ServerStorage` (montado uma vez a partir do
 (hitbox ficaria em T-pose eterna). Pesquisa: docs oficiais + padrão da comunidade.
 
 O swap: `FactionCharacter.server` escuta `PlayerAdded`/`CharacterAdded`; se
-`player.Team == Criminosos`, clona o rig, posiciona no spawn e seta
-`player.Character = clone` (respawn manual via `LoadCharacter`-equivalente). BOPE passa
-reto (avatar padrão).
+`player.Team == Criminosos`, clona o rig e troca — **ordem obrigatória:**
+`player.Character = clone` PRIMEIRO, `clone.Parent = workspace` DEPOIS (invertido buga
+replicação/Animate — gotcha clássico). BOPE passa reto (avatar padrão). v1 aceita o
+flash do avatar padrão antes da troca; upgrade registrado:
+`Players.CharacterAutoLoads = false` + spawn direto do clone.
 
 ### 2. Hitboxes por osso (dano por parte SEM mudar o WeaponServer)
 
@@ -59,12 +63,20 @@ reto (avatar padrão).
 | `LeftUpperLeg` | mixamorig:LeftUpLeg | 0.7×1.6×0.7 |
 | `RightUpperLeg` | mixamorig:RightUpLeg | 0.7×1.6×0.7 |
 
-Propriedades: `CanCollide=false`, `CanQuery=true`, `Massless=true`, `Transparency=1`,
-`Anchored=false` + soldadas? Não — **CFramadas por Heartbeat no servidor** ao
+Propriedades: **`Anchored=true`** (raycastável, zero simulação — unanchored cairia sob
+gravidade entre Heartbeats e geraria física à toa), `CanCollide=false`, `CanQuery=true`,
+`Transparency=1`. **CFramadas por Heartbeat no servidor** ao
 `Bone.TransformedWorldCFrame` (as anims tocadas pelo dono replicam ao servidor via
 Animator, então os bones do servidor refletem a pose real — agachou, hitbox desce).
 Custo: 8 jogadores × 5 partes = trivial. O raycast do WeaponServer já exclui o
 personagem do atirador; nada muda lá.
+
+**TESTE #0 (antes de qualquer implementação):** validar em Play que
+`Bone.TransformedWorldCFrame` lido no SERVIDOR reflete a anim tocada pelo CLIENTE dono
+(~10 linhas de script). É a premissa que carrega esta seção; se falhar, a arquitetura
+de hitbox muda. No mesmo teste: tentar `RigidConstraint` hitbox→Bone (Bone herda de
+Attachment) — se seguir a anim no servidor, elimina o loop de Heartbeat (upgrade; o
+loop ancorado é o baseline garantido).
 
 ### 3. State machine de animação (cliente do dono)
 
@@ -103,8 +115,12 @@ passa a notificar o `CharacterAnimator` local (callback), sem duplicar lógica.
   dono da velocidade; cliente não seta). Servidor também grava atributos
   (`Crouching`, `Aiming`) no personagem — úteis pra hitbox (crouch encolhe HRP? v1: HRP
   fixa; só a hitbox `Head` desce porque segue o osso) e futuros sistemas.
-- **Morte:** `Humanoid.Died` no servidor → toca `death` no Animator do servidor
-  (replica), ancora HRP, espera `RespawnDelay` (3s), respawna via swap de novo.
+- **Morte:** o **cliente dono** escuta `Humanoid.Died` e toca `death` no próprio
+  Animator (replica igual às outras 15 — mantém UMA origem de animação; misturar tracks
+  de servidor e cliente no mesmo Animator não tem comportamento garantido na doc e o
+  devforum reporta conflitos). Servidor em paralelo: ancora HRP, espera `RespawnDelay`
+  (3s), respawna via swap. Edge case aceito: dono crashar na morte = corpo congela sem
+  anim.
 - **Jump:** estado do Humanoid (replica sozinho); anim disparada pelo dono.
 
 ### 5. Arquivos
@@ -154,6 +170,9 @@ Humanoid.Died ─→ servidor: death anim + respawn
 
 ## Fora de escopo (v1)
 
+- **Hitbox de braços e canelas** — decisão consciente: com HRP `CanQuery=false`, tiro
+  no braço/canela atravessa sem dano. Upgrade barato depois (+4 partes no mapa
+  osso→parte).
 - Personagem BOPE (avatar padrão por enquanto).
 - Ragdoll na morte (anim resolve; ragdoll é upgrade futuro).
 - HRP encolher no crouch (hitbox Head já desce; caixa de colisão fixa é aceitável).
