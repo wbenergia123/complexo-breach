@@ -36,18 +36,19 @@ function StateResolver.resolve(input)
 	if forward < 0 then
 		return "walkBackward"
 	end
-	if input.sprinting and not input.aiming then
-		return "run"
+	-- modelo CS: base = corrida; Shift/mira = andar
+	if input.slowWalk or input.aiming then
+		return "walk"
 	end
-	return "walk"
+	return "run"
 end
 
 function StateResolver.runChecks()
 	local r = StateResolver.resolve
 	assert(r({}) == "idle", "vazio = idle")
-	assert(r({ speed = 10, forward = 1 }) == "walk", "frente = walk")
-	assert(r({ speed = 18, forward = 1, sprinting = true }) == "run", "shift = run")
-	assert(r({ speed = 18, forward = 1, sprinting = true, aiming = true }) == "walk", "mira cancela sprint")
+	assert(r({ speed = 16, forward = 1 }) == "run", "frente = corrida (base CS)")
+	assert(r({ speed = 10, forward = 1, slowWalk = true }) == "walk", "shift = andar devagar")
+	assert(r({ speed = 10, forward = 1, aiming = true }) == "walk", "mirando anda (nao corre)")
 	assert(r({ speed = 10, forward = -1 }) == "walkBackward", "re")
 	assert(r({ speed = 10, side = 1 }) == "strafeRight", "direita")
 	assert(r({ speed = 10, side = -1 }) == "strafeLeft", "esquerda")

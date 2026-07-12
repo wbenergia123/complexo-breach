@@ -83,7 +83,7 @@ local function spawnFaction(player: Player)
 	rig:PivotTo(pickSpawnCFrame())
 
 	local humanoid = rig:WaitForChild("Humanoid") :: Humanoid
-	humanoid.WalkSpeed = CharacterConfig.Speeds.walk
+	humanoid.WalkSpeed = CharacterConfig.Speeds.base
 
 	local mesh = rig:FindFirstChild("Body") :: MeshPart
 	followConns[player] = buildHitboxes(rig, mesh)
@@ -136,17 +136,18 @@ Remotes.MovementState.OnServerEvent:Connect(function(player, state)
 	end
 	local crouching = state.crouching == true
 	local aiming = state.aiming == true
-	local sprinting = state.sprinting == true
+	local slowWalk = state.slowWalk == true
 	char:SetAttribute("Crouching", crouching)
 	char:SetAttribute("Aiming", aiming)
+	-- modelo CS: base = corrida; Shift/mira = andar; agachado = mais lento
 	local s = CharacterConfig.Speeds
 	if crouching then
 		humanoid.WalkSpeed = s.crouch
 	elseif aiming then
 		humanoid.WalkSpeed = s.aimWalk
-	elseif sprinting then
-		humanoid.WalkSpeed = s.run
+	elseif slowWalk then
+		humanoid.WalkSpeed = s.shiftWalk
 	else
-		humanoid.WalkSpeed = s.walk
+		humanoid.WalkSpeed = s.base
 	end
 end)

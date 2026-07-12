@@ -16,7 +16,7 @@ local UPPER_KEYS = { aimUpper = true, shootUpper = true, reloadUpper = true }
 
 local CharacterAnimator = {}
 
-local state = { crouching = false, sprinting = false, aiming = false }
+local state = { crouching = false, slowWalk = false, aiming = false }
 local tracks: { [string]: AnimationTrack } = {}
 
 local function sendState()
@@ -53,11 +53,7 @@ local function onCharacter(char: Model)
 	local hrp = char:WaitForChild("HumanoidRootPart") :: BasePart
 	loadTracks(animator)
 
-	-- 1ª pessoa: dono não vê o próprio corpo
-	local mesh = char:FindFirstChild("Body")
-	if mesh and mesh:IsA("BasePart") then
-		mesh.LocalTransparencyModifier = 1
-	end
+	-- 1ª pessoa: o engine já esconde o corpo do dono conforme o zoom (automático)
 
 	-- morte: dono toca a death (uma origem de animação só) [spec v2]
 	humanoid.Died:Connect(function()
@@ -87,7 +83,7 @@ local function onCharacter(char: Model)
 			side = localDir.X,
 			aiming = state.aiming,
 			crouching = state.crouching,
-			sprinting = state.sprinting,
+			slowWalk = state.slowWalk,
 			airborne = hState == Enum.HumanoidStateType.Jumping
 				or hState == Enum.HumanoidStateType.Freefall,
 		})
@@ -123,12 +119,13 @@ function CharacterAnimator.start()
 		return Enum.ContextActionResult.Pass
 	end, false, Enum.KeyCode.LeftControl)
 
-	ContextActionService:BindAction("FactionSprint", function(_, inputState)
+	-- modelo CS: Shift = andar devagar (nao sprint)
+	ContextActionService:BindAction("FactionWalk", function(_, inputState)
 		if inputState == Enum.UserInputState.Begin then
-			state.sprinting = true
+			state.slowWalk = true
 			sendState()
 		elseif inputState == Enum.UserInputState.End then
-			state.sprinting = false
+			state.slowWalk = false
 			sendState()
 		end
 		return Enum.ContextActionResult.Pass

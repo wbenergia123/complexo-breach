@@ -7,11 +7,13 @@ local CharacterConfig = {}
 CharacterConfig.TeamName = "Criminosos"
 CharacterConfig.RespawnDelay = 3
 
+-- Modelo CS puro (ref: Evostrike groundMaxSpeed=21.5, walk=14, crouch=10):
+-- velocidade base JA E a corrida; Shift = andar devagar (silencioso no futuro).
 CharacterConfig.Speeds = {
-	walk = 10,
-	run = 18, -- Shift (sprint)
-	aimWalk = 6, -- mirando (ADS)
-	crouch = 6, -- Ctrl
+	base = 16, -- corrida padrao (anim: run)
+	shiftWalk = 10, -- Shift segurado (anim: walk)
+	aimWalk = 10, -- mirando (ADS)
+	crouch = 7, -- Ctrl
 }
 
 CharacterConfig.Rig = {
@@ -30,9 +32,9 @@ CharacterConfig.Hitboxes = {
 
 function CharacterConfig.runChecks()
 	local s = CharacterConfig.Speeds
-	assert(s.run > s.walk, "run deve ser mais rapido que walk")
-	assert(s.crouch < s.walk, "crouch deve ser mais lento que walk")
-	assert(s.aimWalk < s.walk, "aimWalk deve ser mais lento que walk")
+	assert(s.base > s.shiftWalk, "base (corrida) deve ser mais rapida que shiftWalk")
+	assert(s.crouch < s.shiftWalk, "crouch deve ser mais lento que shiftWalk")
+	assert(s.aimWalk < s.base, "aimWalk deve ser mais lento que a base")
 
 	local seen = {}
 	for _, hb in CharacterConfig.Hitboxes do
