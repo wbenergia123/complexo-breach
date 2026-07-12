@@ -92,13 +92,28 @@ local function onCharacter(char: Model)
 				or hState == Enum.HumanoidStateType.Freefall,
 		})
 		if target ~= current then
-			if current and tracks[current] then
-				tracks[current]:Stop(0.2)
+			-- crouchIdle usa a MESMA track do crouchWalk, congelada (truque da refém)
+			local function trackFor(name)
+				return name == "crouchIdle" and tracks.crouchWalk or tracks[name]
 			end
-			local t = tracks[target]
-			if t then
-				t.Looped = true
-				t:Play(0.15)
+			local oldT = current and trackFor(current)
+			local newT = trackFor(target)
+			if oldT ~= newT then
+				if oldT then
+					oldT:Stop(0.2)
+				end
+				if newT then
+					newT.Looped = true
+					newT:Play(0.15)
+				end
+			end
+			if newT then
+				if target == "crouchIdle" then
+					newT.TimePosition = 0 -- frame neutro (pés juntos)
+					newT:AdjustSpeed(0) -- congela agachado
+				else
+					newT:AdjustSpeed(1)
+				end
 			end
 			current = target
 		end

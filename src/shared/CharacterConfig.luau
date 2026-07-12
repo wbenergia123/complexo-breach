@@ -21,7 +21,7 @@ CharacterConfig.Rig = {
 	hipHeight = 0.3, -- calibrado na montagem do rig
 	-- agachado: ENCOLHE a HRP (abaixar HipHeight nao funciona — a caixa colide no chao
 	-- e a fisica empurra de volta). Caixa menor = corpo desce (4.4-2.9)/2 = 0.75.
-	crouchRootHeight = 2.9,
+	crouchRootHeight = 2.9, -- pro cócoras (postura única de crouch, estilo CS)
 }
 
 -- Hitboxes nomeadas como R15: o computeDamage atual funciona sem mudança.

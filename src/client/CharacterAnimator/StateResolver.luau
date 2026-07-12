@@ -18,7 +18,9 @@ function StateResolver.resolve(input)
 
 	if input.crouching then
 		if not moving then
-			return "kneelingIdle"
+			-- estilo CS: agachado parado = MESMA postura do crouchWalk (congelada
+			-- pelo animator via AdjustSpeed 0). Kneeling profundo fica pra poses futuras.
+			return "crouchIdle"
 		end
 		if math.abs(side) > math.abs(forward) then
 			return side > 0 and "crouchRight" or "crouchLeft"
@@ -53,7 +55,7 @@ function StateResolver.runChecks()
 	assert(r({ speed = 10, side = 1 }) == "strafeRight", "direita")
 	assert(r({ speed = 10, side = -1 }) == "strafeLeft", "esquerda")
 	assert(r({ aiming = true }) == "aim", "mira parado")
-	assert(r({ crouching = true }) == "kneelingIdle", "agachado parado")
+	assert(r({ crouching = true }) == "crouchIdle", "agachado parado (postura do walk congelada)")
 	assert(r({ speed = 6, forward = 1, crouching = true }) == "crouchWalk", "agachado frente")
 	assert(r({ speed = 6, forward = -1, crouching = true }) == "crouchBack", "agachado re")
 	assert(r({ speed = 6, side = 1, crouching = true }) == "crouchRight", "agachado dir")
