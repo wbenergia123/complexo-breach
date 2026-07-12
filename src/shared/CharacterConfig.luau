@@ -19,6 +19,7 @@ CharacterConfig.Speeds = {
 CharacterConfig.Rig = {
 	rootSize = Vector3.new(2, 4.4, 1.4), -- caixa de colisão da HRP
 	hipHeight = 0.3, -- calibrado na montagem do rig
+	crouchHipDrop = 0.45, -- quanto o corpo desce agachado (pés no chão; calibrar no teste)
 }
 
 -- Hitboxes nomeadas como R15: o computeDamage atual funciona sem mudança.

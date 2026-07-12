@@ -143,6 +143,9 @@ Remotes.MovementState.OnServerEvent:Connect(function(player, state)
 	local slowWalk = state.slowWalk == true
 	char:SetAttribute("Crouching", crouching)
 	char:SetAttribute("Aiming", aiming)
+	-- agachado: corpo desce de verdade (pés no chão, sem flutuar)
+	local rigCfg = CharacterConfig.Rig
+	humanoid.HipHeight = crouching and (rigCfg.hipHeight - rigCfg.crouchHipDrop) or rigCfg.hipHeight
 	-- modelo CS: base = corrida; Shift/mira = andar; agachado = mais lento
 	local s = CharacterConfig.Speeds
 	if crouching then
