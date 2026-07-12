@@ -10,6 +10,8 @@ if game.PlaceId == Config.StartPlaceId then
 	MainMenu.mount()
 	LobbyCamera.start()
 elseif game.PlaceId == Config.FavelaPlaceId then
+	local CharacterAnimator = require(script:WaitForChild("CharacterAnimator"))
+	CharacterAnimator.start()
 	local WeaponClient = require(script:WaitForChild("WeaponClient"))
 	WeaponClient.start()
 end
