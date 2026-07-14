@@ -25,13 +25,13 @@ calibração do `gripOffset` da arma na mão em 3ª pessoa (thread travado).
 mais caro do projeto — v1 entrega o esqueleto funcional no jogo, polimento depois.
 
 **Dentro do v1:**
-- Rig de viewmodel: braços+mãos (do **Terrorista A**) + X9-72 presa à mão direita.
+- Rig de viewmodel: braços+mãos (do **Terrorista B** — Mixamo direto, ~65 ossos, dedos completos) + X9-72 presa à mão direita.
 - 4 anims **mínimas** (§6): idle quase-estático, fire curto, reload-mímica, equip básico.
 - Rewrite do `Viewmodel.luau` preservando o contrato público (§4).
 - Export da matriz arma↔mão pra corrigir `CharacterConfig.WorldGun.gripOffset` (§8).
 
 **Fase 2 (fora do v1, registrado):**
-- Braço por skin (A e B têm braços diferentes) — v1 usa o braço do A pra todos.
+- Braço por skin (A e B têm braços diferentes) — v1 usa o braço do **B** pra todos.
 - Reload com pente destacando de fato (exige separar geometria da malha) — v1 é mímica.
 - Anims de inspect, ADS-idle dedicado, run/sprint pose.
 - Dedos totalmente articulados (v1 = 1 osso por mão + polegar).
@@ -40,7 +40,7 @@ mais caro do projeto — v1 entrega o esqueleto funcional no jogo, polimento dep
 
 ### Blender — `viewmodel_x972.blend`, uma armature
 - `root` — origem = ponto de fixação na câmera.
-- `R_forearm → R_hand → R_thumb, R_fingers` (extraídos do Terrorista A).
+- `mixamorig:RightForeArm → RightHand → dedos` (extraídos do Terrorista B; Mixamo já traz os dedos — **mantemos os nomes `mixamorig:*`**).
 - `L_forearm → L_hand → L_thumb, L_fingers`.
 - `gun` — osso **rígido** (malha X9-72 weight 100%), **filho de `R_hand`** (arma parenteada à
   mão, tip #7 do vídeo). `L_hand` segue a `gun`/`R_hand` por constraint, keyframando a
@@ -76,6 +76,12 @@ root
 ```
 Dedos econômicos: 1 osso `*_fingers` (pose de grip fixa) + `*_thumb` separado só se precisar
 reposicionar o polegar no reload.
+
+**Atualização (rig real):** o Terrorista B é Mixamo direto (65 ossos) e já traz dedos
+articulados de graça — então **mantemos os nomes `mixamorig:*`** (não renomeamos):
+`mixamorig:RightForeArm/RightHand/RightHand{Thumb,Index,Middle,...}` etc. `gun` é o único osso
+novo, filho de `mixamorig:RightHand`. Isso faz a matriz de grip (§8) cair direto no
+`mixamorig:RightHand` do CharacterConfig.
 
 ## 6. As 4 anims v1 (mínimas, princípios do vídeo embutidos)
 
@@ -141,7 +147,7 @@ antes de declarar bom** — enquadramento e grip mentem em número (regra da cas
 
 ## 13. Decisões registradas
 
-- Skin: braços do **Terrorista A** pra todos no v1; por-skin é fase 2.
+- Skin: braços do **Terrorista B** (Mixamo direto, 65 ossos) pra todos no v1; por-skin é fase 2.
 - Reload: **mímica** é o plano principal do v1, não fallback.
 - Muzzle: **fixo na part**, não no osso.
 - Anims **mínimas** (tranco/mímica), não autoradas a mão; polir depois de estar no jogo.
