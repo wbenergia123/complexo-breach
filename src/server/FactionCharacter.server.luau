@@ -16,8 +16,14 @@ end
 local CharacterConfig = require(ReplicatedStorage.Shared.CharacterConfig)
 local Remotes = require(ReplicatedStorage.Shared.CharacterRemotes)
 
-local rigTemplate = ServerStorage:WaitForChild("TraficanteRig")
+-- skins da facção: pasta com os rigs; cada spawn sorteia um (variedade estilo CS)
+local rigFolder = ServerStorage:WaitForChild("FactionRigs")
 local followConns: { [Player]: RBXScriptConnection } = {}
+
+local function pickRigTemplate(): Model
+	local rigs = rigFolder:GetChildren()
+	return rigs[math.random(#rigs)] :: Model
+end
 
 local function pickSpawnCFrame(): CFrame
 	local map = workspace:FindFirstChild("Map")
@@ -75,7 +81,7 @@ end
 local function spawnFaction(player: Player)
 	cleanupPlayer(player)
 	local old = player.Character -- avatar padrão ou cadáver do respawn
-	local rig = rigTemplate:Clone()
+	local rig = pickRigTemplate():Clone()
 	rig.Name = player.Name
 
 	-- [spec v2] ordem obrigatória: Character ANTES de parentear no Workspace
