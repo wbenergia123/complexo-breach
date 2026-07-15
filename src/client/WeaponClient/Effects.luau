@@ -1,24 +1,18 @@
 -- src/client/WeaponClient/Effects.luau
--- Muzzle flash (partícula + luz) + fumaça + tracer + som por tiro. Só visual/áudio (cliente).
+-- Muzzle flash (partícula, sem luz dinâmica) + fumaça + som por tiro. Só visual/áudio (cliente).
 -- Técnica: ParticleEmitters no cano (como Evostrike), texturas nativas do Roblox.
-
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local Debris = game:GetService("Debris")
 
 local Effects = {}
 Effects.__index = Effects
-
-local FLASH_TIME = 0.04
-local TRACER_TIME = 0.06
 
 function Effects.new(viewmodelPart, cfg)
 	local self = setmetatable({}, Effects)
 	self.part = viewmodelPart
 	self.cfg = cfg
 
-	-- ponto do cano: o Viewmodel cria "MuzzlePoint" na ponta; fallback se não achar
-	local muzzle = viewmodelPart:FindFirstChild("MuzzlePoint")
+	-- ponto do cano: o Viewmodel cria "MuzzlePoint" na ponta (pendurado no osso do
+	-- grip, não na part — busca recursiva pelo rig inteiro); fallback se não achar
+	local muzzle = viewmodelPart.Parent and viewmodelPart.Parent:FindFirstChild("MuzzlePoint", true)
 	if not muzzle then
 		muzzle = Instance.new("Attachment")
 		muzzle.Name = "MuzzlePoint"
@@ -27,20 +21,32 @@ function Effects.new(viewmodelPart, cfg)
 	end
 	self.muzzle = muzzle
 
-	-- flash: flipbook animado (renderizado no Blender), brilho aditivo, rotação aleatória
+	-- flash estilo CS: sprite real do GoldSrc (muzzleflash3 frame1, convertido de
+	-- .spr, estrela limpa) — usuário escolheu no contact sheet dos 15 frames (15/jul)
 	local flash = Instance.new("ParticleEmitter")
-	flash.Texture = "rbxassetid://89860754097528" -- muzzle flash 4x4 v2 (16 quadros, mais real + fogo forte)
-	flash.FlipbookLayout = Enum.ParticleFlipbookLayout.Grid4x4
-	flash.FlipbookMode = Enum.ParticleFlipbookMode.OneShot
-	flash.Color = ColorSequence.new(Color3.fromRGB(255, 210, 120)) -- tinge quente
+	flash.Texture = "rbxassetid://93733434092821"
+	flash.Color = ColorSequence.new(Color3.fromRGB(255, 225, 160))
 	flash.LightEmission = 1
 	flash.LightInfluence = 0
-	flash.Size = NumberSequence.new(2.2)
-	flash.Lifetime = NumberRange.new(0.06, 0.06)
+	-- Size é em studs do MUNDO, não pixels de tela — e o muzzle fica ~0.3-0.5 studs
+	-- da câmera (colado no olho). 0.175 studs aí ocupava ~30% da largura da tela por
+	-- pura perspectiva (objeto perto = grande na tela), virava o "feixe" na foto do
+	-- usuário. Reduzido pra caber como um clarão pequeno de verdade [15/jul]
+	flash.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.0675), -- +50% [usuário 15/jul]
+		NumberSequenceKeypoint.new(1, 0.018),
+	})
+	flash.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.15),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	flash.Lifetime = NumberRange.new(0.025, 0.025)
 	flash.Speed = NumberRange.new(0)
 	flash.Rotation = NumberRange.new(0, 360)
 	flash.Rate = 0
 	flash.Enabled = false
+	flash.LockedToPart = true -- gruda no muzzle a vida toda; sem isso a partícula solta
+	-- no mundo ao nascer e, com a câmera girando rápido, fica pra trás [usuário 15/jul]
 	flash.Parent = muzzle
 	self.flash = flash
 
@@ -52,22 +58,21 @@ function Effects.new(viewmodelPart, cfg)
 		NumberSequenceKeypoint.new(0, 0.5),
 		NumberSequenceKeypoint.new(1, 1),
 	})
-	smoke.Size = NumberSequence.new(0.25, 0.8)
-	smoke.Lifetime = NumberRange.new(0.2, 0.35)
+	-- mesmo problema de escala do flash (perto da câmera = gigante na tela) — valores
+	-- antigos (0.45-1.3) eram maiores até que os do flash, contribuía pro "feixe"
+	smoke.Size = NumberSequence.new(0.11, 0.32)
+	smoke.Lifetime = NumberRange.new(0.35, 0.55)
 	smoke.Speed = NumberRange.new(2, 4)
 	smoke.SpreadAngle = Vector2.new(12, 12)
 	smoke.Rate = 0
 	smoke.Enabled = false
+	smoke.LockedToPart = true -- mesmo motivo do flash: gruda no muzzle a vida toda
 	smoke.Parent = muzzle
 	self.smoke = smoke
 
-	-- luz do disparo (dá o "pop")
-	local light = Instance.new("PointLight")
-	light.Color = Color3.fromRGB(255, 220, 140)
-	light.Range = 12
-	light.Brightness = 0
-	light.Parent = viewmodelPart
-	self.light = light
+	-- SEM PointLight: o CS de verdade não usa luz dinâmica no muzzle flash, só o
+	-- sprite 2D — evita brigar com Bloom/SunRays do mapa (a luz colada na câmera
+	-- estourava o bloom e virava um feixe gigante na tela) [usuário 15/jul]
 
 	-- som (opcional; só se houver SoundId configurado)
 	if cfg.fireSoundId and cfg.fireSoundId ~= "" then
@@ -81,39 +86,12 @@ function Effects.new(viewmodelPart, cfg)
 	return self
 end
 
-function Effects:fire(direction)
-	local origin = self.muzzle.WorldPosition
-
-	-- muzzle flash: flipbook + fumaça + luz
+function Effects:fire()
+	-- muzzle flash: clarão + fumaça (sem luz — ver comentário no construtor). O
+	-- risco/tracer curto foi removido — depois de virar caixa→cilindro e ainda
+	-- confundir, os dois já dão feedback suficiente sozinhos [usuário 15/jul]
 	self.flash:Emit(1)
-	self.smoke:Emit(1)
-	self.light.Brightness = 4
-	task.delay(FLASH_TIME, function()
-		if self.light then
-			self.light.Brightness = 0
-		end
-	end)
-
-	-- tracer: raycast visual do cliente pra achar o fim do rastro
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Exclude
-	local char = Players.LocalPlayer.Character
-	params.FilterDescendantsInstances = { self.part, char }
-	local result = Workspace:Raycast(origin, direction.Unit * self.cfg.range, params)
-	local finish = result and result.Position or (origin + direction.Unit * self.cfg.range)
-
-	local dist = (finish - origin).Magnitude
-	local tracer = Instance.new("Part")
-	tracer.Anchored = true
-	tracer.CanCollide = false
-	tracer.CanQuery = false
-	tracer.CastShadow = false
-	tracer.Material = Enum.Material.Neon
-	tracer.Color = Color3.fromRGB(255, 230, 150)
-	tracer.Size = Vector3.new(0.08, 0.08, dist)
-	tracer.CFrame = CFrame.lookAt(origin, finish) * CFrame.new(0, 0, -dist / 2)
-	tracer.Parent = Workspace
-	Debris:AddItem(tracer, TRACER_TIME)
+	self.smoke:Emit(3)
 
 	-- som
 	if self.sound then

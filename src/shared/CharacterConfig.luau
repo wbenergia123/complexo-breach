@@ -22,6 +22,10 @@ CharacterConfig.Rig = {
 	-- agachado: ENCOLHE a HRP (abaixar HipHeight nao funciona — a caixa colide no chao
 	-- e a fisica empurra de volta). Caixa menor = corpo desce (4.4-2.9)/2 = 0.75.
 	crouchRootHeight = 3.4, -- pro cócoras (postura única de crouch; calibrado: 2.9 afundava os pés)
+	-- sobe a câmera em 1ª pessoa sem mexer na caixa de colisão/hitbox (Humanoid.CameraOffset,
+	-- puramente visual). Pedido do usuário 15/jul: câmera parecia baixa demais.
+	-- medido no item da foto do usuário (SpawnLocation perto do spawn, Size.Y = 1)
+	cameraHeightBoost = 1.0,
 }
 
 -- Hitboxes nomeadas como R15: o computeDamage atual funciona sem mudança.

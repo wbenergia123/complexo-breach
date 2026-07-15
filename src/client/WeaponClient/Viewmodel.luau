@@ -12,15 +12,14 @@ local ViewmodelAnims = require(ReplicatedStorage.Shared.ViewmodelAnims)
 local Viewmodel = {}
 Viewmodel.__index = Viewmodel
 
-local SCALE = 0.6
--- pivô do rig (bbox center) relativo à câmera — calibração ao vivo 15/jul (loop de
--- screenshot via MCP). Pistola de pé (up.Y +0.99), cano à frente (look.Z -0.99),
--- mão no canto inferior direito (0.35, -0.55). Pré-requisito: clone com ScaleTo(SCALE)
--- e WorldPivot = GetBoundingBox() (mesmo referencial da calibração).
-local HIP = CFrame.new(0.2203, -3.3817, -0.1666, 0.9950, 0.0040, 0.0994, 0.0000, 0.9992, -0.0398, -0.0995, 0.0396, 0.9942)
--- ADS: desloca o conjunto (camera-space) pra centralizar/subir a arma; 1º chute,
--- refinar quando montarmos a mira de verdade (Aim.luau)
-local ADS = CFrame.new(-0.20, 0.05, 0.20) * HIP
+local SCALE = 1 -- rig Akito já vem no tamanho certo (calibrado sem scale)
+-- pivô do rig (bbox center) relativo à câmera — calibração 15/jul (loop de screenshot
+-- via MCP, pack Akito). Arma de pé (up.Y +1.00), cano à frente (look.Z -1.00), osso da
+-- arma J51 em (0.30,-0.35,-0.95). Pré-requisito: WorldPivot = GetBoundingBox().
+local HIP = CFrame.new(0.0206, -1.5444, -0.0212, 0.9982, 0.0012, 0.0599, 0.0000, 0.9998, -0.0200, -0.0599, 0.0199, 0.9980)
+-- ADS: mira nos ferros, dead-center (calibrado ao vivo, mesmo loop de screenshot).
+-- CFrame absoluto (não relativo ao HIP) — evita herdar deslocamentos horizontais do hip.
+local ADS = CFrame.new(-0.0798, -1.5687, 0.0652, 0.9998, -0.0000, 0.0200, 0.0000, 1.0000, -0.0000, -0.0200, 0.0000, 0.9998)
 
 function Viewmodel.new()
 	local self = setmetatable({}, Viewmodel)
@@ -45,11 +44,18 @@ function Viewmodel.new()
 	-- contrato antigo: .part é a arma (Effects pendura o muzzle flash aqui)
 	local pistol = rig:FindFirstChild("Pistol", true)
 	self.part = pistol
-	if pistol and not pistol:FindFirstChild("MuzzlePoint") then
+
+	-- gotcha do pack Akito: a MeshPart "Pistol" não segue o osso corretamente (CFrame
+	-- fica ~1.4 studs longe da posição real, herdado de bind quebrado no import) — o
+	-- muzzle usa o osso J51 (grip da arma) direto, que segue a pose animada certinho.
+	-- Offset medido por raycast de tela (15/jul): ponta do cano ≈ (0.05, 0.03, 0.20)
+	-- no espaço local do osso.
+	local gripBone = rig:FindFirstChild("J51", true)
+	if gripBone and not gripBone:FindFirstChild("MuzzlePoint") then
 		local muzzle = Instance.new("Attachment")
 		muzzle.Name = "MuzzlePoint"
-		muzzle.Position = Vector3.new(0, pistol.Size.Y / 2, -pistol.Size.Z / 2)
-		muzzle.Parent = pistol
+		muzzle.Position = Vector3.new(0.0548, 0.0288, 0.2029)
+		muzzle.Parent = gripBone
 	end
 
 	-- idle via Animator (AnimationController veio do import)
@@ -74,18 +80,30 @@ function Viewmodel.new()
 	self.aiming = false
 	self.aimAlpha = 0
 
-	self.conn = RunService.RenderStepped:Connect(function(dt)
-		local target = self.aiming and 1 or 0
-		self.aimAlpha += (target - self.aimAlpha) * math.clamp(dt * 12, 0, 1)
+	-- reposiciona o rig; chamada tanto pelo loop quanto por setRecoil() (senão o
+	-- muzzle fica 1 frame atrasado no tiro — dava impressão de "vir de trás")
+	local function reposition()
 		local cam = Workspace.CurrentCamera
 		local offset = HIP:Lerp(ADS, self.aimAlpha)
 		rig:PivotTo(cam.CFrame * self.recoilOffset * offset)
+	end
+
+	-- roda DEPOIS da câmera nativa E do Recoil (Camera+2, Recoil usa Camera+1) —
+	-- senão a arma às vezes desenhava com a pose de câmera do frame anterior ao
+	-- ANDAR/OLHAR [usuário 15/jul]
+	self.bindName = "ViewmodelPosition_" .. tostring(rig)
+	RunService:BindToRenderStep(self.bindName, Enum.RenderPriority.Camera.Value + 2, function(dt)
+		local target = self.aiming and 1 or 0
+		self.aimAlpha += (target - self.aimAlpha) * math.clamp(dt * 12, 0, 1)
+		reposition()
 	end)
+	self.reposition = reposition
 	return self
 end
 
 function Viewmodel:setRecoil(recoilCFrame)
 	self.recoilOffset = recoilCFrame
+	self.reposition()
 end
 
 function Viewmodel:setAiming(aiming)
@@ -93,8 +111,8 @@ function Viewmodel:setAiming(aiming)
 end
 
 function Viewmodel:destroy()
-	if self.conn then
-		self.conn:Disconnect()
+	if self.bindName then
+		RunService:UnbindFromRenderStep(self.bindName)
 	end
 	if self.idleTrack then
 		self.idleTrack:Stop()

@@ -28,7 +28,7 @@ function Input.start(cfg, recoil, effects, aim)
 		localMag -= 1
 		recoil:kick() -- feedback instantâneo
 		local dir = Workspace.CurrentCamera.CFrame.LookVector
-		effects:fire(dir) -- muzzle flash + tracer + som
+		effects:fire() -- muzzle flash + fumaça + risco curto + som
 		CharacterAnimator.onShot() -- tranco do tiro em 3ª pessoa
 		Remotes.FireRequest:FireServer(dir) -- [R3] só direção
 	end

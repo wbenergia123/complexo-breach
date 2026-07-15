@@ -99,6 +99,7 @@ local function spawnFaction(player: Player)
 
 	local humanoid = rig:WaitForChild("Humanoid") :: Humanoid
 	humanoid.WalkSpeed = CharacterConfig.Speeds.base
+	humanoid.CameraOffset = Vector3.new(0, CharacterConfig.Rig.cameraHeightBoost, 0)
 
 	local mesh = rig:FindFirstChild("Body") :: MeshPart
 	followConns[player] = buildHitboxes(rig, mesh)
