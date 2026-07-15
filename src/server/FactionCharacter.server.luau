@@ -45,7 +45,9 @@ local function buildHitboxes(character: Model, mesh: MeshPart): RBXScriptConnect
 			bones[d.Name] = d
 		end
 	end
-	local parts: { [BasePart]: Bone } = {}
+	-- cada entrada segue um osso (hitboxes sem offset; arma com grip offset)
+	local follows: { [BasePart]: { bone: Bone, offset: CFrame } } = {}
+	local IDENTITY = CFrame.new()
 	for _, hb in CharacterConfig.Hitboxes do
 		local bone = bones[hb.bone]
 		if not bone then
@@ -62,11 +64,14 @@ local function buildHitboxes(character: Model, mesh: MeshPart): RBXScriptConnect
 		p.Transparency = 1
 		p.CFrame = bone.TransformedWorldCFrame
 		p.Parent = character
-		parts[p] = bone
+		follows[p] = { bone = bone, offset = IDENTITY }
 	end
+
+	-- (arma de mundo X9-72 removida — a pistola do pack FPS vai substituir na 3ª pessoa)
+
 	return RunService.Heartbeat:Connect(function()
-		for p, bone in parts do
-			p.CFrame = bone.TransformedWorldCFrame
+		for p, f in follows do
+			p.CFrame = f.bone.TransformedWorldCFrame * f.offset
 		end
 	end)
 end

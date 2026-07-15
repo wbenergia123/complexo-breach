@@ -141,7 +141,7 @@ function CharacterAnimator.start()
 			sendState()
 		end
 		return Enum.ContextActionResult.Pass
-	end, false, Enum.KeyCode.LeftControl, Enum.KeyCode.C) -- C tambem: Ctrl+clique vira botao direito no macOS
+	end, false, Enum.KeyCode.C) -- so C: no macOS, Ctrl vira clique-direito e Cmd(print) vira Ctrl
 
 	-- modelo CS: Shift = andar devagar (nao sprint)
 	ContextActionService:BindAction("FactionWalk", function(_, inputState)
